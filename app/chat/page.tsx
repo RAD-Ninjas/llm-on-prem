@@ -58,14 +58,24 @@ const Chat = () => {
     });
   };
 
+  // ----------------- OpenAI API -----------------
   const submitData = async (msg) => {
+    console.log(localState.messages)
+
     return await fetch("/api/openai/generate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ prompt: msg.prompt, prompt_id: msg.id }),
+
+      
+
+      body: JSON.stringify({
+        prompt: msg.prompt,
+        prompt_id: msg.id,
+        chat_history: localState.messages
+      }),
     });
   };
 
@@ -191,7 +201,7 @@ const Chat = () => {
           }}
         />
       </div>
-      <div className={styles["user-prompt"]}>&lt;disclaimer&gt;</div>
+      <div className={styles["user-prompt"]}>This app is for educational purposes. Not intended for production use</div>
     </main>
   );
 };

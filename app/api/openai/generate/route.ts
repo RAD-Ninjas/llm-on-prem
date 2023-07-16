@@ -21,7 +21,7 @@ const ACTION = 'openai_generate'
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
-  basePath: 'http://localhost:8000/v1',
+  basePath: process.env.MODEL_BASE_PATH,
 })
 
 const openai = new OpenAIApi(configuration)
@@ -60,6 +60,7 @@ const handler = async (req: NextRequestWithAuth) => {
   const body = await req.json()
   const prompt = body?.prompt?.trim() || ''
   const prompt_id = body?.prompt_id || ''
+  const chat_history = body?.chat_history || []
 
   if (prompt.length === 0) {
     return new Response('Please enter a valid prompt', { status: 400 })
@@ -92,6 +93,16 @@ const handler = async (req: NextRequestWithAuth) => {
           role: ChatCompletionRequestMessageRoleEnum.System,
           content: 'You are a language model assistant.',
         },
+        // Populate the chat history
+        ...chat_history.map((msg, ix: number) => {
+          return {
+            role:
+              ix % 2 === 0
+                ? ChatCompletionRequestMessageRoleEnum.User
+                : ChatCompletionRequestMessageRoleEnum.System,
+            content: msg.message,
+          }
+        }),
         {
           role: ChatCompletionRequestMessageRoleEnum.User,
           content: processedPrompt,
@@ -111,8 +122,10 @@ const handler = async (req: NextRequestWithAuth) => {
     let chatResults
 
     if (results.length > 1) {
-      auditResults = results[0]?.value
-      chatResults = results[1]?.value
+      auditResults = results[0] as any
+      auditResults = auditResults?.value
+      chatResults = results[1] as any
+      chatResults = chatResults?.value
     } else {
       chatResults = results[0]
     }
