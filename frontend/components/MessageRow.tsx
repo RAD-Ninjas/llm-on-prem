@@ -1,6 +1,5 @@
 import Highlighter from "react-highlight-words";
 import BeatLoader from "react-spinners/BeatLoader";
-import styles from "../app/page.module.css";
 
 const MessageRow = ({ message }: any) => {
   const highlight = (txt: string) => (
@@ -10,11 +9,13 @@ const MessageRow = ({ message }: any) => {
   );
   return (
     <div
-      className={`${styles.message} ${message.user === "System" ? styles.system : ""
-        }`}
+      // w-full p-4 flex border-b border-gray-300
+      className={`w-full p-4 flex border-b border-gray-300${message.user === "System" ? " backdrop-grayscale" : ""}`}
     >
-      <div className={styles.messageuser}>{message.user}:</div>
-      <div className={styles.messagecontent}>
+      <div className="text-md pr-4 w-16">
+        {message.user}:
+      </div>
+      <div className="">
         {message.message ? (
           <Highlighter
             highlightStyle={{

@@ -1,7 +1,6 @@
 "use client";
 import { useAuth } from "@pangeacyber/react-auth";
 
-import styles from "../app/page.module.css";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -42,37 +41,37 @@ const AppBar = () => {
   }, [authenticated]);
 
   return (
-    <header>
-      <div className="border-solid borde">
-        <div className={styles.navlink}>
+    <div className="border-r-2 w-1/5 min-w-fit">
+      <div >
+        <div className="p-1">
           <Link href={"/"}>Home</Link>
         </div>
 
         {authenticated && (
-          <div className={styles.navlink}>
+          <div className="p-1">
             <Link href={"/chat"}>Secure ChatGPT</Link>
           </div>
         )}
       </div>
-      <div className={styles["bar-actions"]}>
+      <div className="px-1 py-0">
         {authenticated && (
           <>
-            <div className={styles["server-settings"]}>
-              <div>Audit: {serverSettings?.audit ? "Enabled" : "Disabled"}</div>
-            </div>
-            <div className={styles["server-settings"]}>
-              <div>
-                Redact: {serverSettings?.redact ? "Enabled" : "Disabled"}
-              </div>
-            </div>
-            <div className={styles["server-settings"]}>
-              <div>
-                Threat Analysis:{" "}
-                {serverSettings?.threatAnalysis ? "Enabled" : "Disabled"}
-              </div>
-            </div>
+
+            <p>Audit: {serverSettings?.audit ? "Enabled" : "Disabled"}</p>
+
+
+            <p>
+              Redact: {serverSettings?.redact ? "Enabled" : "Disabled"}
+            </p>
+
+
+            <p>
+              Threat Analysis:{" "}
+              {serverSettings?.threatAnalysis ? "Enabled" : "Disabled"}
+            </p>
+
             <Button
-              className={styles["header-action"]}
+              className=""
               onClick={() => logout()}
             >
               Sign Out
@@ -80,12 +79,13 @@ const AppBar = () => {
           </>
         )}
         {!authenticated && (
-          <Button className={styles["header-action"]} onClick={() => login()}>
+          <Button className=""
+            onClick={() => login()}>
             Sign In
           </Button>
         )}
       </div>
-    </header>
+    </div>
   );
 };
 

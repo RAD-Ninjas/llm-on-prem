@@ -1,16 +1,15 @@
 "use client";
 
 import { useAuth } from "@pangeacyber/react-auth";
-import styles from "./page.module.css";
 import Link from "next/link";
 
 export default function Home() {
   const { authenticated } = useAuth();
 
   return (
-    <main className={styles.main}>
+    <main className="w-full h-full p-0 box-border flex flex-col text-base">
       <div>
-        <div className={styles.card}>
+        <div className="px-4 py-5 rounded-var bg-trans-black/0 border-1 border-trans-var(--card-border-rgb)/0">
           <h2>
             Welcome to Secure ChatGPT starter app powered by{" "}
             <a href="https://pangea.cloud/">Pangea</a>

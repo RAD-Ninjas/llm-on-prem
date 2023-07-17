@@ -1,10 +1,11 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import styles from "../page.module.css";
+
 import { useAuth } from "@pangeacyber/react-auth";
 import pageWithAuthentication from "../../components/pageWithAuthentication";
 import MessageRow from "../../components/MessageRow";
+import { Textarea } from "@/components/ui/textarea";
 
 const initialState = {
   prompt: "",
@@ -173,8 +174,8 @@ const Chat = () => {
   }, [localState.messages]);
 
   return (
-    <main className={styles.main}>
-      <div className={styles.messages}>
+    <main className="w-full h-full p-0 flex flex-col text-sm">
+      <div className="w-full h-full overflow-y-auto text-sm">
         <>
           {localState.messages.map((msg: any) => (
             <MessageRow key={msg.id} message={msg} />
@@ -185,16 +186,15 @@ const Chat = () => {
         </>
         <div ref={messagesEndRef} />
       </div>
-      <div className={styles["user-prompt"]}>
-        <input
-          type="text"
+      <div className="relative flex-0 flex-1 w-100">
+        <Textarea
           placeholder={
             localState.loading
               ? "PLEASE WAIT FOR THE PREVIOUS REQUEST TO COMPLETE"
               : "Enter a prompt"
           }
           value={localState.prompt}
-          className={styles.entryBox}
+          className="border border-gray-300 px-4 py-2 text-base w-4/5 h-12 m-4 rounded-lg"
           onChange={(e) =>
             setLocalState((prev) => ({ ...prev, prompt: e.target.value }))
           }

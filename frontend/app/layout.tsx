@@ -33,9 +33,9 @@ export default function RootLayout({
       <head />
       <body>
         <AuthProvider loginUrl={hostedLoginURL} config={authConfig}>
-          <div className="container">
+          <div className="flex w-full h-screen border-2 border-dashed overflow-auto border-red-600">
             <AppBar />
-            <div className="content">{children}</div>
+            <div className="container">{children}</div>
           </div>
         </AuthProvider>
       </body>
