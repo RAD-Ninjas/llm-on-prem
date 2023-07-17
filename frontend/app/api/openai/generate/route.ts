@@ -27,7 +27,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration)
 
 // return true or false based on the reputation service response
-const isMalicious = async (url) => {
+const isMalicious = async (url: string) => {
   const urlIntelResponse = await urlIntel.reputation(url, {
     provider: 'crowdstrike',
   })
@@ -94,7 +94,7 @@ const handler = async (req: NextRequestWithAuth) => {
           content: 'You are a language model assistant.',
         },
         // Populate the chat history
-        ...chat_history.map((msg, ix: number) => {
+        ...chat_history.map((msg: any, ix: number) => {
           return {
             role:
               ix % 2 === 0
@@ -153,7 +153,7 @@ const handler = async (req: NextRequestWithAuth) => {
             sanitizedResponse = sanitizedResponse.replaceAll(url, defangedURL)
           }
         }
-      } catch (errTA) {
+      } catch (errTA: any) {
         console.error(
           `Error occurred during threat analysis, and content was not analyzed: ${errTA.message}`
         )
@@ -170,7 +170,7 @@ const handler = async (req: NextRequestWithAuth) => {
     return new Response(JSON.stringify(responseData), {
       headers: { 'content-type': 'application/json' },
     })
-  } catch (error) {
+  } catch (error: any) {
     if (error.response) {
       console.error(error.response.status, error.response.data)
       return new Response('An error occurred during your request.', {

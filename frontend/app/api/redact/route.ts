@@ -19,7 +19,7 @@ const handler = async (req: NextRequestWithAuth) => {
         headers: { "content-type": "application/json" },
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     if (error.response) {
       console.error(error.response.status, error.response.data);
       return new Response("An error occurred during your request.", {

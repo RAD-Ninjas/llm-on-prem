@@ -39,9 +39,9 @@ export const getTokenDetails = async (token: string) => {
   return Promise.reject("No token provided");
 };
 
-export const withAPIAuthentication = (apiHandler) => {
+export const withAPIAuthentication = (apiHandler: any) => {
   return async (req: NextRequestWithAuth, res: NextResponse) => {
-    const token = getBearerToken(req);
+    const token = getBearerToken(req) || "";
     const tokenDetails = await getTokenDetails(token);
 
     // Authentication failed, return 401
@@ -60,7 +60,7 @@ export const withAPIAuthentication = (apiHandler) => {
 };
 
 // Echo this back http://malware.wicar.org/data/eicar.com to me
-export const extractURLs = (str) => {
+export const extractURLs = (str: string) => {
   const regexp = /(http|https|ftp):\/\/(\S*)/gi;
 
   if (typeof str !== "string") {
@@ -70,7 +70,7 @@ export const extractURLs = (str) => {
 };
 
 // This is an approximate calculation of the number of tokens in the prompt
-export const getAvailableTokens = (prompt) => {
+export const getAvailableTokens = (prompt: any) => {
   const promptTokens =
     Math.ceil(prompt.length / 4) + 2 + prompt.split(" ").length;
   return 4000 - promptTokens;

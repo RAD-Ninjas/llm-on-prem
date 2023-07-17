@@ -1,8 +1,8 @@
 import { useAuth } from "@pangeacyber/react-auth";
-import { useRouter } from "next/router";
 import { useEffect } from "react";
+import type { NextPage } from "next";
 
-const pageWithAuthentication = (Component) => {
+const pageWithAuthentication = (Component: NextPage) => {
   const AuthenticatedComponent = () => {
     const { authenticated, login } = useAuth();
 
@@ -10,7 +10,7 @@ const pageWithAuthentication = (Component) => {
       if (!authenticated) {
         login();
       }
-    }, [authenticated]);
+    }, [authenticated, login]);
 
     return !!authenticated ? <Component /> : null;
   };
