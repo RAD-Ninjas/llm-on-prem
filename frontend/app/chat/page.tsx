@@ -17,13 +17,13 @@ const Chat = () => {
   const { getToken, user } = useAuth();
   const [localState, setLocalState] = useState(initialState);
 
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   const token = getToken();
 
   // Append the list with the given message
-  const addToMessages = (message) => {
-    setLocalState((prev) => {
+  const addToMessages = (message: any) => {
+    setLocalState((prev: any) => {
       return {
         ...prev,
         messages: [...prev.messages, message],
@@ -32,10 +32,10 @@ const Chat = () => {
   };
 
   // Update the message with the given ID with the given content
-  const updateMessagePrompt = (messageID, newPrompt) => {
-    setLocalState((prev) => ({
+  const updateMessagePrompt = (messageID: string, newPrompt: string) => {
+    setLocalState((prev: any) => ({
       ...prev,
-      messages: prev.messages.map((m) => {
+      messages: prev.messages.map((m: any) => {
         if (m.id === messageID) {
           return {
             ...m,
@@ -47,7 +47,7 @@ const Chat = () => {
     }));
   };
 
-  const redactData = async (msg) => {
+  const redactData = async (msg: any) => {
     return await fetch("/api/redact", {
       method: "POST",
       headers: {
@@ -59,7 +59,7 @@ const Chat = () => {
   };
 
   // ----------------- OpenAI API -----------------
-  const submitData = async (msg) => {
+  const submitData = async (msg: any) => {
     console.log(localState.messages)
 
     return await fetch("/api/openai/generate", {
@@ -69,7 +69,7 @@ const Chat = () => {
         Authorization: `Bearer ${token}`,
       },
 
-      
+
 
       body: JSON.stringify({
         prompt: msg.prompt,
@@ -79,7 +79,7 @@ const Chat = () => {
     });
   };
 
-  const handleKeyDown = async (e) => {
+  const handleKeyDown = async (e: any) => {
     if (e.key === "Enter" && !localState.loading) {
       e.preventDefault();
       try {
@@ -146,7 +146,7 @@ const Chat = () => {
             });
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         // Add the error as a message so users can see it
         addToMessages({
           id: uuidv4(),
@@ -166,14 +166,17 @@ const Chat = () => {
 
   // We scroll to the bottom of the messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current !== null) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+
+    }
   }, [localState.messages]);
 
   return (
     <main className={styles.main}>
       <div className={styles.messages}>
         <>
-          {localState.messages.map((msg) => (
+          {localState.messages.map((msg: any) => (
             <MessageRow key={msg.id} message={msg} />
           ))}
           {localState.promptLoading && (
@@ -201,7 +204,7 @@ const Chat = () => {
           }}
         />
       </div>
-      <div className={styles["user-prompt"]}>This app is for educational purposes. Not intended for production use</div>
+      <div >This app is for educational purposes. Not intended for production use</div>
     </main>
   );
 };

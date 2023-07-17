@@ -2,17 +2,16 @@ import Highlighter from "react-highlight-words";
 import BeatLoader from "react-spinners/BeatLoader";
 import styles from "../app/page.module.css";
 
-const MessageRow = ({ message }) => {
-  const highlight = (txt) => (
+const MessageRow = ({ message }: any) => {
+  const highlight = (txt: string) => (
     <>
       <span style={{ color: "red", background: "transparent" }}>{txt}</span>
     </>
   );
   return (
     <div
-      className={`${styles.message} ${
-        message.user === "System" ? styles.system : ""
-      }`}
+      className={`${styles.message} ${message.user === "System" ? styles.system : ""
+        }`}
     >
       <div className={styles.messageuser}>{message.user}:</div>
       <div className={styles.messagecontent}>
