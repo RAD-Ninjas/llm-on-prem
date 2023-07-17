@@ -10,10 +10,7 @@ export default function Home() {
     <main className="w-full h-full p-0 box-border flex flex-col text-base">
       <div>
         <div className="px-4 py-5 rounded-var bg-trans-black/0 border-1 border-trans-var(--card-border-rgb)/0">
-          <h2>
-            Welcome to Secure ChatGPT starter app powered by{" "}
-            <a href="https://pangea.cloud/">Pangea</a>
-          </h2>
+
           {authenticated && <p>Please navigate to the  <Link href={"/chat"}>Secure ChatGPT</Link></p>}
           {!authenticated && <p>Please sign in to see the chat page.</p>}
         </div>

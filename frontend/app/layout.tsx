@@ -1,6 +1,7 @@
 "use client"
 import { AuthProvider } from "@pangeacyber/react-auth"
 import AppBar from "../components/AppBar"
+import { ThemeProvider } from "@/components/theme-provider"
 
 import "./globals.css"
 
@@ -33,10 +34,13 @@ export default function RootLayout({
       <head />
       <body>
         <AuthProvider loginUrl={hostedLoginURL} config={authConfig}>
-          <div className="flex w-full h-screen border-2 border-dashed overflow-auto border-red-600">
-            <AppBar />
-            <div className="container">{children}</div>
-          </div>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+
+            <div className="flex w-full h-screen overflow-auto">
+              <AppBar />
+              <div className="container">{children}</div>
+            </div>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

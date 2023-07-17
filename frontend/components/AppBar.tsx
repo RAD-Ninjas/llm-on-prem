@@ -4,6 +4,7 @@ import { useAuth } from '@pangeacyber/react-auth'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import ThemeModeToggle from '@/components/ThemeModeToggle'
 
 type ServerSettings = {
   audit?: Boolean
@@ -40,8 +41,12 @@ const AppBar = () => {
   }, [authenticated])
 
   return (
-    <div className='border-r-2 w-1/5 min-w-fit flex flex-col justify-between'>
-      <div className='flex flex-col px-4 py-3 gap-2'>
+    <div className='border-r-2 dark:border-r-neutral-800 w-1/5 min-w-fit flex flex-col justify-between px-4 py-3'>
+      <div className='flex flex-col  gap-2'>
+        <div className='flex items-center justify-between'>
+          <p className='text-lg font-bold'>🤙🥷 LLM On Prem </p>
+          <ThemeModeToggle />
+        </div>
         <Link href={'/'} passHref className='w-full'>
           <Button className='w-full' variant='secondary'>
             Home
@@ -56,20 +61,22 @@ const AppBar = () => {
           </Link>
         )}
       </div>
-      <div className='px-1 py-0'>
+      <div className='px-1 py-0 mb-2'>
         {authenticated && (
-          <>
-            <p>Audit: {serverSettings?.audit ? 'Enabled' : 'Disabled'}</p>
+          <div className='flex flex-col gap-8'>
+            <div className='flex flex-col gap-2'>
+              <p>Audit: {serverSettings?.audit ? 'Enabled' : 'Disabled'}</p>
 
-            <p>Redact: {serverSettings?.redact ? 'Enabled' : 'Disabled'}</p>
+              <p>Redact: {serverSettings?.redact ? 'Enabled' : 'Disabled'}</p>
 
-            <p>
-              Threat Analysis:{' '}
-              {serverSettings?.threatAnalysis ? 'Enabled' : 'Disabled'}
-            </p>
+              <p>
+                Threat Analysis:{' '}
+                {serverSettings?.threatAnalysis ? 'Enabled' : 'Disabled'}
+              </p>
+            </div>
 
             <Button onClick={() => logout()}>Sign Out</Button>
-          </>
+          </div>
         )}
         {!authenticated && (
           <Button variant='secondary' color='purple' onClick={() => login()}>

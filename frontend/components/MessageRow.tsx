@@ -11,7 +11,7 @@ const MessageRow = ({ message }: any) => {
     <div
       // w-full p-4 flex border-b border-gray-300
       className={`w-full p-4 flex rounded-md border-gray-300 ${
-        message.user === 'System' ? 'bg-slate-100' : ''
+        message.user === 'System' ? 'bg-slate-100 dark:bg-neutral-900' : ''
       }`}
     >
       <div className='text-md mr-8 w-16'>{message.user}:</div>

@@ -201,9 +201,6 @@ const Chat = () => {
             setLocalState((prev) => ({ ...prev, prompt: e.target.value }))
           }
           onKeyDown={handleKeyDown}
-          style={{
-            backgroundColor: localState.loading ? "#eee" : "#fff",
-          }}
         />
       </div>
       <div className="flex justify-center my-2">This app is for educational purposes. Not intended for production use</div>
