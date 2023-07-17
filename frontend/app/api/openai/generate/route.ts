@@ -112,8 +112,6 @@ const handler = async (req: NextRequestWithAuth) => {
       // max_tokens: getAvailableTokens(processedPrompt),
     }
 
-    console.log(chatReqData)
-
     promises.push(openai.createChatCompletion(chatReqData))
 
     const results = await Promise.allSettled(promises)
