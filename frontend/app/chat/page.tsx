@@ -1,14 +1,14 @@
-"use client"
-import { useState, useRef, useEffect } from "react"
-import { v4 as uuidv4 } from "uuid"
+'use client'
+import { useState, useRef, useEffect } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
-import { useAuth } from "@pangeacyber/react-auth"
-import pageWithAuthentication from "../../components/pageWithAuthentication"
-import MessageRow from "../../components/MessageRow"
-import { Textarea } from "@/components/ui/textarea"
+import { useAuth } from '@pangeacyber/react-auth'
+import pageWithAuthentication from '../../components/pageWithAuthentication'
+import MessageRow from '../../components/MessageRow'
+import { Textarea } from '@/components/ui/textarea'
 
 const initialState = {
-  prompt: "",
+  prompt: '',
   loading: false,
   promptLoading: false,
   messages: [],
@@ -49,10 +49,10 @@ const Chat = () => {
   }
 
   const redactData = async (msg: any) => {
-    return await fetch("/api/redact", {
-      method: "POST",
+    return await fetch('/api/redact', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ prompt: msg.prompt, prompt_id: msg.id }),
@@ -63,29 +63,27 @@ const Chat = () => {
   const submitData = async (msg: any) => {
     console.log(localState.messages)
 
-    return await fetch("/api/openai/generate", {
-      method: "POST",
+    return await fetch('/api/openai/generate', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-
-
 
       body: JSON.stringify({
         prompt: msg.prompt,
         prompt_id: msg.id,
-        chat_history: localState.messages
+        chat_history: localState.messages,
       }),
     })
   }
 
   const handleKeyDown = async (e: any) => {
-    if (e.key === "Enter" && !localState.loading) {
+    if (e.key === 'Enter' && !localState.loading) {
       e.preventDefault()
       try {
         // Clean the prompt/input and set loading to true
-        setLocalState((prev) => ({ ...prev, prompt: "", loading: true }))
+        setLocalState((prev) => ({ ...prev, prompt: '', loading: true }))
 
         // Omitting message here so we show a loading ellipsis
         // When we receive the response, we will populate the message field
@@ -93,7 +91,7 @@ const Chat = () => {
         const id = uuidv4()
         const userPrompt = {
           id,
-          user: user?.profile?.first_name || "User",
+          user: user?.profile?.first_name || 'User',
         }
 
         addToMessages(userPrompt)
@@ -110,7 +108,7 @@ const Chat = () => {
           console.error(errorContent, redactResponse.status)
           addToMessages({
             id: uuidv4(),
-            user: "System",
+            user: 'System',
             message: `${errorContent} | Status: ${redactResponse.status}`,
             maliciousURLs: [],
           })
@@ -132,7 +130,7 @@ const Chat = () => {
             promptData = await promptResponse.json()
             addToMessages({
               id: uuidv4(),
-              user: "System",
+              user: 'System',
               message: promptData?.result,
               maliciousURLs: promptData?.maliciousURLs,
             })
@@ -141,7 +139,7 @@ const Chat = () => {
             console.error(errorContent, promptResponse.status)
             addToMessages({
               id: uuidv4(),
-              user: "System",
+              user: 'System',
               message: `${errorContent} | Status: ${promptResponse.status}`,
               maliciousURLs: [],
             })
@@ -151,8 +149,8 @@ const Chat = () => {
         // Add the error as a message so users can see it
         addToMessages({
           id: uuidv4(),
-          user: "System",
-          message: error.message || "Something went wrong",
+          user: 'System',
+          message: error.message || 'Something went wrong',
           maliciousURLs: [],
         })
       } finally {
@@ -168,33 +166,28 @@ const Chat = () => {
   // We scroll to the bottom of the messages
   useEffect(() => {
     if (messagesEndRef.current !== null) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
-
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [localState.messages])
 
   return (
-    <main className="w-full h-full p-0 flex flex-col text-sm">
-      <div className="w-full h-full overflow-y-auto text-sm">
+    <main className='w-full h-full p-0 flex flex-col'>
+      <div className='w-full h-full overflow-y-auto mt-4'>
         <>
           {localState.messages.map((msg: any) => (
             <MessageRow key={msg.id} message={msg} />
           ))}
           {localState.promptLoading && (
-            <MessageRow key="loader" message={{ user: "System" }} />
+            <MessageRow key='loader' message={{ user: 'System' }} />
           )}
         </>
         <div ref={messagesEndRef} />
       </div>
-      <div className="relative flex-0 flex-1 w-100">
+      <div className='relative flex-0 flex-1 w-100'>
         <Textarea
-          className="resize-none my-4"
+          className='resize-none my-4'
           disabled={localState.loading}
-          placeholder={
-            localState.loading
-              ? ""
-              : "Enter a prompt"
-          }
+          placeholder={localState.loading ? '' : 'Enter a prompt'}
           value={localState.prompt}
           // className="border border-gray-300 px-4 py-2 text-base w-4/5 h-12 m-4 rounded-lg"
           onChange={(e) =>
@@ -203,7 +196,9 @@ const Chat = () => {
           onKeyDown={handleKeyDown}
         />
       </div>
-      <div className="flex justify-center my-2">This app is for educational purposes. Not intended for production use</div>
+      <div className='flex justify-center my-2'>
+        This app is for educational purposes. Not intended for production use
+      </div>
     </main>
   )
 }
