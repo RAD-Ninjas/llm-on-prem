@@ -5,6 +5,7 @@ import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import ThemeModeToggle from '@/components/ThemeModeToggle'
+import { Separator } from '@/components/ui/separator'
 
 type ServerSettings = {
   audit?: Boolean
@@ -47,15 +48,15 @@ const AppBar = () => {
           <p className='text-lg font-bold'>🤙🥷 LLM On Prem </p>
           <ThemeModeToggle />
         </div>
+        <Separator/>
         <Link href={'/'} passHref className='w-full'>
-          <Button className='w-full' variant='secondary'>
+          <Button className='w-full' variant='ghost'>
             Home
           </Button>
         </Link>
-
         {authenticated && (
           <Link href={'/chat'} passHref className='w-full'>
-            <Button className='w-full' variant='secondary'>
+            <Button className='w-full' variant='ghost'>
               Secure LLM Chat
             </Button>
           </Link>
@@ -75,7 +76,7 @@ const AppBar = () => {
               </p>
             </div>
 
-            <Button onClick={() => logout()}>Sign Out</Button>
+            <Button variant='secondary' onClick={() => logout()}>Sign Out</Button>
           </div>
         )}
         {!authenticated && (
