@@ -4,6 +4,7 @@ import { useAuth } from "@pangeacyber/react-auth";
 import styles from "../app/page.module.css";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 type ServerSettings = {
   audit?: Boolean;
@@ -42,7 +43,7 @@ const AppBar = () => {
 
   return (
     <header>
-      <div className={styles.nav}>
+      <div className="border-solid borde">
         <div className={styles.navlink}>
           <Link href={"/"}>Home</Link>
         </div>
@@ -70,18 +71,18 @@ const AppBar = () => {
                 {serverSettings?.threatAnalysis ? "Enabled" : "Disabled"}
               </div>
             </div>
-            <button
+            <Button
               className={styles["header-action"]}
               onClick={() => logout()}
             >
               Sign Out
-            </button>
+            </Button>
           </>
         )}
         {!authenticated && (
-          <button className={styles["header-action"]} onClick={() => login()}>
+          <Button className={styles["header-action"]} onClick={() => login()}>
             Sign In
-          </button>
+          </Button>
         )}
       </div>
     </header>
