@@ -1,19 +1,19 @@
-"use client";
-import { AuthProvider } from "@pangeacyber/react-auth";
-import AppBar from "../components/AppBar";
+"use client"
+import { AuthProvider } from "@pangeacyber/react-auth"
+import AppBar from "../components/AppBar"
 
-import "./globals.css";
+import "./globals.css"
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  const hostedLoginURL = process?.env?.NEXT_PUBLIC_AUTHN_HOSTED_LOGIN_URL || "";
+  const hostedLoginURL = process?.env?.NEXT_PUBLIC_AUTHN_HOSTED_LOGIN_URL || ""
   const authConfig = {
     clientToken: process?.env?.NEXT_PUBLIC_AUTHN_CLIENT_TOKEN || "",
     domain: process?.env?.NEXT_PUBLIC_PANGEA_DOMAIN || "",
-  };
+  }
 
   if (!authConfig.clientToken || !authConfig.domain) {
     return (
@@ -26,7 +26,7 @@ export default function RootLayout({
           </h2>
         </body>
       </html>
-    );
+    )
   }
   return (
     <html lang="en">
@@ -40,5 +40,5 @@ export default function RootLayout({
         </AuthProvider>
       </body>
     </html>
-  );
+  )
 }
