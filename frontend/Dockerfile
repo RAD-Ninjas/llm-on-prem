@@ -17,7 +17,7 @@ RUN pnpm prune --prod
 FROM base AS deploy
 WORKDIR /app
 RUN mkdir -p /app
-COPY --from=build /app/dist ./dist
+COPY --from=build /app/.next ./dist
 COPY --from=build /app/node_modules ./node_modules
 
 EXPOSE 3000
