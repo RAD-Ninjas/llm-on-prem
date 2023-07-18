@@ -1,0 +1,84 @@
+version: '3'
+
+services:
+
+  # Next.js frontend ---------------------------------------------
+  app:
+    build:
+      context: ./next
+      dockerfile: Dockerfile
+    image: llm-on-prem-app
+    working_dir: /app
+    command: "node server.js"
+    network_mode: host
+    env_file:
+      - ./next/.env.local
+    # ports:
+    #   - 3000:3000
+
+  # Model Controller ---------------------------------------------
+  # controller:
+  #   build:
+  #     context: ./models
+  #     dockerfile: Dockerfile
+  #   image: llm-on-prem-fastchat
+  #   network_mode: host
+  #   command: "python3 -m fastchat.serve.controller"
+    
+  # worker:
+  #   image: llm-on-prem-fastchat
+  #   network_mode: host
+  #   command: python3 -m fastchat.serve.vllm_worker --model-path mosaicml/mpt-7b-chat
+  #   shm_size: 8gb
+  
+  # api-server:
+  #   image: llm-on-prem-fastchat
+  #   network_mode: host
+  #   command: python3 -m fastchat.serve.openai_api_server --host 0.0.0.0 --port 8000
+
+  fastchat-controller:
+    build:
+      context: ./models
+      dockerfile: Dockerfile
+    image: fastchat:latest
+    ports:
+      - "21001:21001"
+    entrypoint: ["python3", "-m", "fastchat.serve.controller", "--host", "0.0.0.0", "--port", "21001"]
+
+  fastchat-model-worker:
+    build:
+      context: ./models
+      dockerfile: Dockerfile
+    volumes:
+      - huggingface:/root/.cache/huggingface
+    image: fastchat:latest
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    entrypoint: ["python3",
+                  "-m", "fastchat.serve.vllm_worker",
+                  "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-mpt-7b-chat}",
+                  "--model-path", "mosaicml/mpt-7b-chat",
+                  "--worker-address", "http://fastchat-model-worker:21002",
+                  "--controller-address", "http://fastchat-controller:21001",
+                  "--host", "0.0.0.0",
+                  "--port", "21002"]
+  
+  fastchat-api-server:
+    build:
+      context: ./models
+      dockerfile: Dockerfile
+    image: fastchat:latest
+    ports:
+      - "8000:8000"
+    entrypoint: ["python3", 
+                 "-m", "fastchat.serve.openai_api_server",
+                 "--controller-address", "http://fastchat-controller:21001",
+                 "--host", "0.0.0.0",
+                 "--port", "8000"]
+volumes:
+  huggingface:
