@@ -12,9 +12,9 @@ services:
     command: "node server.js"
     env_file:
       - ./next/.env.local
-    # network_mode: host
-    ports:
-      - 3000:3000
+    network_mode: host
+    # ports:
+    #   - 3000:3000
 
   # Model Controller ---------------------------------------------
   fastchat-controller:
