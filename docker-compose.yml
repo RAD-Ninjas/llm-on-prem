@@ -10,32 +10,13 @@ services:
     image: llm-on-prem-app
     working_dir: /app
     command: "node server.js"
-    network_mode: host
     env_file:
       - ./next/.env.local
-    # ports:
-    #   - 3000:3000
+    # network_mode: host
+    ports:
+      - 3000:3000
 
   # Model Controller ---------------------------------------------
-  # controller:
-  #   build:
-  #     context: ./models
-  #     dockerfile: Dockerfile
-  #   image: llm-on-prem-fastchat
-  #   network_mode: host
-  #   command: "python3 -m fastchat.serve.controller"
-    
-  # worker:
-  #   image: llm-on-prem-fastchat
-  #   network_mode: host
-  #   command: python3 -m fastchat.serve.vllm_worker --model-path mosaicml/mpt-7b-chat
-  #   shm_size: 8gb
-  
-  # api-server:
-  #   image: llm-on-prem-fastchat
-  #   network_mode: host
-  #   command: python3 -m fastchat.serve.openai_api_server --host 0.0.0.0 --port 8000
-
   fastchat-controller:
     build:
       context: ./models
@@ -45,6 +26,7 @@ services:
       - "21001:21001"
     entrypoint: ["python3", "-m", "fastchat.serve.controller", "--host", "0.0.0.0", "--port", "21001"]
 
+  # Model Worker ---------------------------------------------
   fastchat-model-worker:
     build:
       context: ./models
@@ -68,6 +50,7 @@ services:
                   "--host", "0.0.0.0",
                   "--port", "21002"]
   
+  # API Server ---------------------------------------------
   fastchat-api-server:
     build:
       context: ./models
