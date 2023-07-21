@@ -1,19 +1,9 @@
-import {
-  NextRequestWithAuth,
-  extractURLs,
-  getAvailableTokens,
-  withAPIAuthentication,
-} from '../../../../utils'
+import { NextRequest } from 'next/server'
 import {
   ChatCompletionRequestMessageRoleEnum,
   Configuration,
   OpenAIApi,
 } from 'openai'
-import { audit, domainIntel, urlIntel } from '../../../../utils/pangea'
-
-const shouldAudit = process.env.OPTIONS_AUDIT_USER_PROMPTS === 'true'
-const shouldThreatAnalyse =
-  process.env.OPTIONS_THREAT_ANALYSE_SERVICE_RESPONSES === 'true'
 
 const SOURCE = 'pangea-secure-chatgpt'
 const TARGET_MODEL = 'mpt-7b-chat'
@@ -26,36 +16,12 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration)
 
-// return true or false based on the reputation service response
-const isMalicious = async (url: string) => {
-  const urlIntelResponse = await urlIntel.reputation(url, {
-    provider: 'crowdstrike',
-  })
-
-  const domain = new URL(url).hostname.replace('www.', '')
-  const domainIntelResponse = await domainIntel.reputation(domain, {
-    provider: 'crowdstrike',
-  })
-
-  // If it is malicious, we should redact it
-  if (
-    urlIntelResponse?.result?.data?.verdict === 'malicious' ||
-    domainIntelResponse?.result?.data?.verdict === 'malicious'
-  ) {
-    return true
-  }
-  return false
-}
-
-const handler = async (req: NextRequestWithAuth) => {
+const handler = async (req: NextRequest) => {
   if (!configuration.apiKey) {
     return new Response('The service cannot communicate with OpenAI', {
       status: 500,
     })
   }
-
-  const userID = req.__userSession?.tokenDetails?.identity
-  const actor = req.__userSession?.tokenDetails?.email || userID
 
   const body = await req.json()
   const prompt = body?.prompt?.trim() || ''
@@ -71,19 +37,6 @@ const handler = async (req: NextRequestWithAuth) => {
 
     // we start with the original prompt and update it based on the options
     let processedPrompt = prompt
-
-    // We should audit the user prompt in redacted format
-    if (shouldAudit) {
-      const auditData = {
-        action: ACTION,
-        actor: actor,
-        message: processedPrompt,
-        source: SOURCE,
-        target: TARGET_MODEL,
-      }
-
-      promises.push(audit.log(auditData))
-    }
 
     // Call OpenAI API with the processed prompt
     const chatReqData = {
@@ -135,36 +88,10 @@ const handler = async (req: NextRequestWithAuth) => {
     sanitizedResponse = sanitizedResponse.replaceAll('<|im_end|>', '')
     sanitizedResponse = sanitizedResponse.replaceAll('<|endoftext|>', '')
 
-    const maliciousURLs = []
-
-    // We should process the OpenAI response thru the reputation services
-    // We currently check URL reputation and domain reputation
-    if (shouldThreatAnalyse) {
-      try {
-        const urls = extractURLs(sanitizedResponse) || []
-        // De-fang all the malicious URLs and domains
-        for (let i = 0; i < urls.length; i++) {
-          const url = urls[i]
-          if (await isMalicious(url)) {
-            let defangedURL = url.replace('https://', 'hxxps://')
-            defangedURL = defangedURL.replace('http://', 'hxxp://')
-            defangedURL = defangedURL.replace('ftp://', 'fxp://')
-            maliciousURLs.push(defangedURL)
-            sanitizedResponse = sanitizedResponse.replaceAll(url, defangedURL)
-          }
-        }
-      } catch (errTA: any) {
-        console.error(
-          `Error occurred during threat analysis, and content was not analyzed: ${errTA.message}`
-        )
-      }
-    }
-
     const responseData = {
       prompt: processedPrompt,
       prompt_id,
       result: sanitizedResponse,
-      maliciousURLs,
     }
 
     return new Response(JSON.stringify(responseData), {
@@ -185,4 +112,4 @@ const handler = async (req: NextRequestWithAuth) => {
   }
 }
 
-export const POST = withAPIAuthentication(handler)
+export const POST = handler
