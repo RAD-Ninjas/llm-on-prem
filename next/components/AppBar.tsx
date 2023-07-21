@@ -13,7 +13,7 @@ const AppBar = () => {
       <div className='flex flex-col gap-2'>
         <div className='flex items-center justify-between'>
           <p className='flex-1 pr-4 text-lg font-bold text-center'>
-            🤙🥷 LLM On Prem
+            🤙🥷 LLM-On-Prem
           </p>
           <ThemeModeToggle />
         </div>
