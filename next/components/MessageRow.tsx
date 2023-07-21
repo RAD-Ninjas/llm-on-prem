@@ -14,7 +14,7 @@ const MessageRow = ({ message }: any) => {
         message.user === 'System' ? 'bg-slate-100 dark:bg-neutral-900 dark:shadow-indigo-900 shadow-md' : ''
       }`}
     >
-      <div className='text-md mr-8 w-16'>{message.user}:</div>
+      <div className='w-16 mr-8 text-md'>{message.user}:</div>
       <div className=''>
         {message.message ? (
           <Highlighter
@@ -33,5 +33,6 @@ const MessageRow = ({ message }: any) => {
     </div>
   )
 }
+
 
 export default MessageRow

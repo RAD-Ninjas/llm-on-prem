@@ -13,8 +13,8 @@ const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
   basePath: process.env.MODEL_BASE_PATH,
 })
-
 const openai = new OpenAIApi(configuration)
+
 
 const handler = async (req: NextRequest) => {
   if (!configuration.apiKey) {
@@ -69,20 +69,17 @@ const handler = async (req: NextRequest) => {
 
     const results = await Promise.allSettled(promises)
 
-    let auditResults
     let chatResults
 
     if (results.length > 1) {
-      auditResults = results[0] as any
-      auditResults = auditResults?.value
-      chatResults = results[1] as any
+      chatResults = results[0] as any
       chatResults = chatResults?.value
     } else {
       chatResults = results[0]
     }
 
     let sanitizedResponse =
-      chatResults.data?.choices?.[0]?.message?.content || ''
+      chatResults?.value?.data?.choices?.[0]?.message?.content || ''
 
     // Remove the pattern "<|im_end|><|endoftext|>" from the response
     sanitizedResponse = sanitizedResponse.replaceAll('<|im_end|>', '')

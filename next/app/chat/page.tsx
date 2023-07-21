@@ -4,15 +4,20 @@ import { v4 as uuidv4 } from 'uuid'
 import MessageRow from '../../components/MessageRow'
 import { Textarea } from '@/components/ui/textarea'
 
-const initialState = {
-  prompt: '',
-  loading: false,
-  promptLoading: false,
-  messages: [],
+type LocalState = {
+  prompt: string
+  loading: boolean
+  promptLoading: boolean
+  messages: string[]
 }
 
 const Chat = () => {
-  const [localState, setLocalState] = useState(initialState)
+  const [localState, setLocalState] = useState({
+    prompt: '',
+    loading: false,
+    promptLoading: false,
+    messages: [],
+  })
 
   const messagesEndRef = useRef<null | HTMLDivElement>(null)
 
@@ -25,22 +30,6 @@ const Chat = () => {
         messages: [...prev.messages, message],
       }
     })
-  }
-
-  // Update the message with the given ID with the given content
-  const updateMessagePrompt = (messageID: string, newPrompt: string) => {
-    setLocalState((prev: any) => ({
-      ...prev,
-      messages: prev.messages.map((m: any) => {
-        if (m.id === messageID) {
-          return {
-            ...m,
-            message: newPrompt,
-          }
-        }
-        return m
-      }),
-    }))
   }
 
   // ----------------- OpenAI API -----------------
@@ -62,7 +51,16 @@ const Chat = () => {
   }
 
   const handleKeyDown = async (e: any) => {
-    if (e.key === 'Enter' && !localState.loading) {
+    if (
+      e.key === 'Enter' &&
+      e.code === 'Enter' &&
+      !e.shiftKey &&
+      !e.altKey &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !localState.loading &&
+      localState.prompt.trim() !== ''
+    ) {
       e.preventDefault()
       try {
         // Clean the prompt/input and set loading to true
@@ -77,7 +75,10 @@ const Chat = () => {
           user: 'User',
         }
 
-        addToMessages(userPrompt)
+        addToMessages({
+          ...userPrompt,
+          message: localState?.prompt,
+        })
 
         // Add the prompt when submitting to the API
         setLocalState((prev) => ({ ...prev, promptLoading: true }))
@@ -116,6 +117,7 @@ const Chat = () => {
           maliciousURLs: [],
         })
       } finally {
+        console.log('finally')
         setLocalState((prev) => ({
           ...prev,
           loading: false,
@@ -145,9 +147,9 @@ const Chat = () => {
         </>
         <div ref={messagesEndRef} />
       </div>
-      <div className='relative flex-1 flex-0 w-100'>
+      <div className='relative flex-1 w-100'>
         <Textarea
-          className='my-4 resize-none'
+          className='my-4 text-md'
           disabled={localState.loading}
           placeholder={localState.loading ? '' : 'Enter a prompt'}
           value={localState.prompt}
@@ -158,9 +160,9 @@ const Chat = () => {
           onKeyDown={handleKeyDown}
         />
       </div>
-      <div className='flex justify-center my-2'>
+      <p className='flex justify-center my-2 text-sm text-gray-400 dark:text-gray-700'>
         This app is for educational purposes. Not intended for production use
-      </div>
+      </p>
     </main>
   )
 }
