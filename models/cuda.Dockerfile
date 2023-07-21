@@ -18,6 +18,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt install --yes --quiet --no-install-recomm
   python3.10-tk \
   pip
 
+RUN pip install -U pip
 RUN pip install fschat einops
 RUN pip install vllm
 
