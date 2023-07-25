@@ -1,0 +1,13 @@
+git+https://github.com/huggingface/optimum-intel.git
+git+https://github.com/huggingface/transformers.git
+gradio
+jupyter
+notebook
+numpy
+onnx>=1.11.0
+onnxruntime
+openvino-dev==2023.0.0
+optimum
+sentencepiece
+streamlit
+streamlit-chat

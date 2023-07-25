@@ -4,7 +4,7 @@ services:
 
   # Next.js frontend ---------------------------------------------
   app:
-    profiles: ["cpu", "cuda", "xla", "ggml", "metal"]
+    profiles: ["cpu", "cuda", "xla", "ggml", "metal", "openvino"]
     build:
       context: ./next
       dockerfile: Dockerfile
@@ -19,7 +19,7 @@ services:
 
   # Model Controller ---------------------------------------------
   fastchat-controller:
-    profiles: ["cpu", "cuda", "xla", "ggml", "metal"]
+    profiles: ["cpu", "cuda", "xla", "ggml", "metal", "openvino"]
     build:
       context: ./models
       dockerfile: cpu.Dockerfile
@@ -30,7 +30,7 @@ services:
 
   # API Server ---------------------------------------------
   fastchat-api-server:
-    profiles: ["cpu", "cuda", "xla", "ggml", "metal"]
+    profiles: ["cpu", "cuda", "xla", "ggml", "metal", "openvino"]
     build:
       context: ./models
       dockerfile: cpu.Dockerfile
@@ -87,6 +87,32 @@ services:
                   "--device", "cpu",
                   "--host", "0.0.0.0",
                   "--port", "21002"]
+
+  fastchat-model-worker-openvino:
+    profiles: ["openvino"]
+    env_file:
+      - .env
+    build:
+      context: ./models
+      dockerfile: openvino.Dockerfile
+    volumes:
+      - /home/chepe/.cache/huggingface:/home/openvino/.cache/huggingface
+      - /home/chepe/rad-ninjas/code/FastChat:/home/openvino/FastChat
+      - /home/chepe/rad-ninjas/code/openvino/models:/home/openvino/models
+    image: fastchat-openvino:latest
+    working_dir: /home/openvino/FastChat
+    entrypoint: ["python3",
+                 "fastchat/serve/openvino_worker.py",
+                 "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-llama-2-7b-chat-hf}",
+                 "--model-path", "/home/openvino/models/llama-2/ir_model",
+                 "--worker-address", "http://fastchat-model-worker-openvino:21002",
+                 "--controller-address", "http://fastchat-controller:21001",
+                 "--host", "0.0.0.0",
+                 "--port", "21002"]
+    ports:
+      - 21002:21002
+
+
   
 volumes:
   huggingface:
