@@ -9,25 +9,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const hostedLoginURL = process?.env?.NEXT_PUBLIC_AUTHN_HOSTED_LOGIN_URL || ""
-  const authConfig = {
-    clientToken: process?.env?.NEXT_PUBLIC_AUTHN_CLIENT_TOKEN || "",
-    domain: process?.env?.NEXT_PUBLIC_PANGEA_DOMAIN || "",
-  }
-
-  if (!authConfig.clientToken || !authConfig.domain) {
-    return (
-      <html lang="en">
-        <head />
-        <body style={{ padding: "40px", textAlign: "center" }}>
-          <h2>
-            Please configure your environment variables. See the README for
-            more...
-          </h2>
-        </body>
-      </html>
-    )
-  }
   return (
     <html lang="en">
       <head />
