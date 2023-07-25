@@ -1,7 +1,3 @@
-# FROM nvcr.io/nvidia/pytorch:22.12-py3
-# RUN pip uninstall -y torch
-# RUN pip install vllm
-
 FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update -y && apt -y upgrade

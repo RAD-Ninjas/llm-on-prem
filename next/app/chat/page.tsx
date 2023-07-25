@@ -1,26 +1,26 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-
-import { useAuth } from '@pangeacyber/react-auth'
-import pageWithAuthentication from '../../components/pageWithAuthentication'
 import MessageRow from '../../components/MessageRow'
 import { Textarea } from '@/components/ui/textarea'
 
-const initialState = {
-  prompt: '',
-  loading: false,
-  promptLoading: false,
-  messages: [],
+type LocalState = {
+  prompt: string
+  loading: boolean
+  promptLoading: boolean
+  messages: string[]
 }
 
 const Chat = () => {
-  const { getToken, user } = useAuth()
-  const [localState, setLocalState] = useState(initialState)
+  const [localState, setLocalState] = useState({
+    prompt: '',
+    loading: false,
+    promptLoading: false,
+    messages: [],
+  })
 
   const messagesEndRef = useRef<null | HTMLDivElement>(null)
 
-  const token = getToken()
 
   // Append the list with the given message
   const addToMessages = (message: any) => {
@@ -32,33 +32,6 @@ const Chat = () => {
     })
   }
 
-  // Update the message with the given ID with the given content
-  const updateMessagePrompt = (messageID: string, newPrompt: string) => {
-    setLocalState((prev: any) => ({
-      ...prev,
-      messages: prev.messages.map((m: any) => {
-        if (m.id === messageID) {
-          return {
-            ...m,
-            message: newPrompt,
-          }
-        }
-        return m
-      }),
-    }))
-  }
-
-  const redactData = async (msg: any) => {
-    return await fetch('/api/redact', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ prompt: msg.prompt, prompt_id: msg.id }),
-    })
-  }
-
   // ----------------- OpenAI API -----------------
   const submitData = async (msg: any) => {
     console.log(localState.messages)
@@ -67,7 +40,6 @@ const Chat = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
       },
 
       body: JSON.stringify({
@@ -79,7 +51,16 @@ const Chat = () => {
   }
 
   const handleKeyDown = async (e: any) => {
-    if (e.key === 'Enter' && !localState.loading) {
+    if (
+      e.key === 'Enter' &&
+      e.code === 'Enter' &&
+      !e.shiftKey &&
+      !e.altKey &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !localState.loading &&
+      localState.prompt.trim() !== ''
+    ) {
       e.preventDefault()
       try {
         // Clean the prompt/input and set loading to true
@@ -91,59 +72,41 @@ const Chat = () => {
         const id = uuidv4()
         const userPrompt = {
           id,
-          user: user?.profile?.first_name || 'User',
+          user: 'User',
         }
 
-        addToMessages(userPrompt)
-
-        let redactedData = { prompt: localState.prompt }
-
-        // Call the redact function
-        const redactResponse = await redactData({
-          prompt: localState.prompt,
+        addToMessages({
+          ...userPrompt,
+          message: localState?.prompt,
         })
 
-        if (redactResponse.status !== 200) {
-          const errorContent = await redactResponse.text()
-          console.error(errorContent, redactResponse.status)
+        // Add the prompt when submitting to the API
+        setLocalState((prev) => ({ ...prev, promptLoading: true }))
+
+        const promptResponse = await submitData({
+          ...userPrompt,
+          prompt: localState?.prompt,
+        })
+
+        let promptData
+        if (promptResponse.status === 200) {
+          promptData = await promptResponse.json()
           addToMessages({
             id: uuidv4(),
             user: 'System',
-            message: `${errorContent} | Status: ${redactResponse.status}`,
-            maliciousURLs: [],
+            message: promptData?.result,
+            maliciousURLs: promptData?.maliciousURLs,
           })
         } else {
-          redactedData = await redactResponse.json()
-          // Update the message with the redacted prompt
-          updateMessagePrompt(id, redactedData?.prompt)
-
-          // Add the prompt when submitting to the API
-          setLocalState((prev) => ({ ...prev, promptLoading: true }))
-
-          const promptResponse = await submitData({
-            ...userPrompt,
-            prompt: redactedData?.prompt,
+          const errorContent = await promptResponse.text()
+          console.error(errorContent, promptResponse.status)
+          addToMessages({
+            id: uuidv4(),
+            user: 'System',
+            message: `${errorContent} | Status: ${promptResponse.status}`,
+            maliciousURLs: [],
           })
 
-          let promptData
-          if (promptResponse.status === 200) {
-            promptData = await promptResponse.json()
-            addToMessages({
-              id: uuidv4(),
-              user: 'System',
-              message: promptData?.result,
-              maliciousURLs: promptData?.maliciousURLs,
-            })
-          } else {
-            const errorContent = await promptResponse.text()
-            console.error(errorContent, promptResponse.status)
-            addToMessages({
-              id: uuidv4(),
-              user: 'System',
-              message: `${errorContent} | Status: ${promptResponse.status}`,
-              maliciousURLs: [],
-            })
-          }
         }
       } catch (error: any) {
         // Add the error as a message so users can see it
@@ -154,6 +117,7 @@ const Chat = () => {
           maliciousURLs: [],
         })
       } finally {
+        console.log('finally')
         setLocalState((prev) => ({
           ...prev,
           loading: false,
@@ -171,8 +135,8 @@ const Chat = () => {
   }, [localState.messages])
 
   return (
-    <main className='w-full h-full p-0 flex flex-col'>
-      <div className='w-full h-full overflow-y-auto mt-4'>
+    <main className='flex flex-col w-full h-full p-0'>
+      <div className='w-full h-full mt-4 overflow-y-auto'>
         <>
           {localState.messages.map((msg: any) => (
             <MessageRow key={msg.id} message={msg} />
@@ -183,24 +147,24 @@ const Chat = () => {
         </>
         <div ref={messagesEndRef} />
       </div>
-      <div className='relative flex-0 flex-1 w-100'>
+      <div className='relative flex-1 w-100'>
         <Textarea
-          className='resize-none my-4'
+          className='my-4 text-md'
           disabled={localState.loading}
           placeholder={localState.loading ? '' : 'Enter a prompt'}
           value={localState.prompt}
-          // className="border border-gray-300 px-4 py-2 text-base w-4/5 h-12 m-4 rounded-lg"
+          // className="w-4/5 h-12 px-4 py-2 m-4 text-base border border-gray-300 rounded-lg"
           onChange={(e) =>
             setLocalState((prev) => ({ ...prev, prompt: e.target.value }))
           }
           onKeyDown={handleKeyDown}
         />
       </div>
-      <div className='flex justify-center my-2'>
+      <p className='flex justify-center my-2 text-sm text-gray-400 dark:text-gray-700'>
         This app is for educational purposes. Not intended for production use
-      </div>
+      </p>
     </main>
   )
 }
 
-export default pageWithAuthentication(Chat)
+export default Chat
