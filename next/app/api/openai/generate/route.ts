@@ -6,7 +6,7 @@ import {
 } from 'openai'
 
 const SOURCE = 'pangea-secure-chatgpt'
-const TARGET_MODEL = 'mpt-7b-chat'
+const TARGET_MODEL = process.env.MODEL_NAME || 'Llama-2-7b-chat-hf'
 const ACTION = 'openai_generate'
 
 const configuration = new Configuration({

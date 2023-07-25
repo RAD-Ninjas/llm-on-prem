@@ -12,21 +12,10 @@ services:
     working_dir: /app
     command: "node server.js"
     env_file:
-      - ./next/.env.local
+      - .env
     network_mode: host
     # ports:
     #   - 3000:3000
-
-  # Model Controller ---------------------------------------------
-  fastchat-controller:
-    profiles: ["cpu", "cuda", "xla", "ggml", "metal", "openvino"]
-    build:
-      context: ./models
-      dockerfile: cpu.Dockerfile
-    image: fastchat-cpu:latest
-    ports:
-      - "21001:21001"
-    entrypoint: ["python3", "-m", "fastchat.serve.controller", "--host", "0.0.0.0", "--port", "21001"]
 
   # API Server ---------------------------------------------
   fastchat-api-server:
@@ -35,13 +24,27 @@ services:
       context: ./models
       dockerfile: cpu.Dockerfile
     image: fastchat-cpu:latest
-    ports:
-      - "8000:8000"
+    network_mode: host
+    # ports:
+      # - "8000:8000"
     entrypoint: ["python3", 
                  "-m", "fastchat.serve.openai_api_server",
-                 "--controller-address", "http://fastchat-controller:21001",
+                #  "--controller-address", "http://fastchat-controller:21001",
+                 "--controller-address", "http://localhost:21001",
                  "--host", "0.0.0.0",
                  "--port", "8000"]
+
+  # Model Controller ---------------------------------------------
+  fastchat-controller:
+    profiles: ["cpu", "cuda", "xla", "ggml", "metal", "openvino"]
+    build:
+      context: ./models
+      dockerfile: cpu.Dockerfile
+    image: fastchat-cpu:latest
+    network_mode: host
+    # ports:
+      # - "21001:21001"
+    entrypoint: ["python3", "-m", "fastchat.serve.controller", "--host", "0.0.0.0", "--port", "21001"]
 
   # Model Worker Cuda ---------------------------------------------
   fastchat-model-worker-cuda:
@@ -52,6 +55,8 @@ services:
     volumes:
       - huggingface:/root/.cache/huggingface
     image: fastchat-cuda:latest
+    env_file:
+      - .env
     deploy:
       resources:
         reservations:
@@ -61,8 +66,8 @@ services:
               capabilities: [gpu]
     entrypoint: ["python3",
                   "-m", "fastchat.serve.vllm_worker",
-                  "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-mpt-7b-chat}",
-                  "--model-path", "mosaicml/mpt-7b-chat",
+                  "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-Llama-2-7b-chat-hf}",
+                  "--model-path", "meta-llama/Llama-2-7b-chat-hf",
                   "--worker-address", "http://fastchat-model-worker-cuda:21002",
                   "--controller-address", "http://fastchat-controller:21001",
                   "--device", "cuda",
@@ -78,10 +83,12 @@ services:
     volumes:
       - huggingface:/root/.cache/huggingface
     image: fastchat-cpu:latest
+    env_file:
+      - .env
     entrypoint: ["python3",
                   "-m", "fastchat.serve.model_worker",
-                  "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-mpt-7b-chat}",
-                  "--model-path", "mosaicml/mpt-7b-chat",
+                  "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-Llama-2-7b-chat-hf}",
+                  "--model-path", "meta-llama/Llama-2-7b-chat-hf",
                   "--worker-address", "http://fastchat-model-worker-cpu:21002",
                   "--controller-address", "http://fastchat-controller:21001",
                   "--device", "cpu",
