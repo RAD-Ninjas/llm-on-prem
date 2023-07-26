@@ -14,8 +14,8 @@ services:
     env_file:
       - .env
     network_mode: host
-    # ports:
-    #   - 3000:3000
+#    ports:
+#       - 3000:3000
 
   # API Server ---------------------------------------------
   fastchat-api-server:
@@ -24,13 +24,12 @@ services:
       context: ./models
       dockerfile: cpu.Dockerfile
     image: fastchat-cpu:latest
-    network_mode: host
-    # ports:
-    #   - "8000:8000"
+#    network_mode: host
+    ports:
+      - "8000:8000"
     entrypoint: ["python3", 
                  "-m", "fastchat.serve.openai_api_server",
-                #  "--controller-address", "http://fastchat-controller:21001",
-                 "--controller-address", "http://localhost:21001",
+                  "--controller-address", "http://fastchat-controller:21001",
                  "--host", "0.0.0.0",
                  "--port", "8000"]
 
@@ -41,9 +40,9 @@ services:
       context: ./models
       dockerfile: cpu.Dockerfile
     image: fastchat-cpu:latest
-    network_mode: host
-    # ports:
-    #   - "21001:21001"
+#    network_mode: host
+    ports:
+      - "21001:21001"
     entrypoint: ["python3", "-m", "fastchat.serve.controller", "--host", "0.0.0.0", "--port", "21001"]
 
   # Model Worker Cuda ---------------------------------------------
@@ -55,7 +54,7 @@ services:
     volumes:
       - huggingface:/root/.cache/huggingface
     image: fastchat-cuda:latest
-    network_mode: host
+#    network_mode: host
     env_file:
       - .env
     deploy:
@@ -78,7 +77,7 @@ services:
     volumes:
       - huggingface:/root/.cache/huggingface
     image: fastchat-cpu:latest
-    network_mode: host
+#    network_mode: host
     env_file:
       - .env
     entrypoint: [
@@ -101,6 +100,7 @@ services:
     entrypoint: [
       "bash", "start.sh"
     ]
+#    network_mode: host
 
   fastchat-model-worker-openvino:
      profiles: ["openvino"]
@@ -121,14 +121,14 @@ services:
                "fastchat/serve/openvino_worker.py",
                "--model-names", "${MODEL_NAME}",
                "--model-path", "${IR_PATH}",
-               "--worker-address", "http://localhost:21002",
-               "--controller-address", "http://localhost:21001",
+               "--worker-address", "http://fastchat-model-worker-openvino:21002",
+               "--controller-address", "http://fastchat-controller:21001",
                "--device","${DEVICE}",
                "--host", "0.0.0.0",
                "--port", "21002"]
      ports:
        - 21002:21002
-       - 8888:8888
+#     network_mode: host
 
   fastchat-model-worker-openvino-setup:
      profiles: ["openvino-setup"]
@@ -146,7 +146,6 @@ services:
      working_dir: /home/openvino/
      entrypoint: ["python3", "-m", "jupyter", "notebook", "--ip=0.0.0.0"]
      ports:
-       - 21002:21002
        - 8888:8888
 
 

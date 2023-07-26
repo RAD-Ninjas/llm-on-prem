@@ -6,8 +6,8 @@ python3 \
 -m fastchat.serve.model_worker \
 --model-names ${MODEL_NAME} \
 --model-path ${MODEL_PATH} \
---worker-address http://localhost:21002 \
---controller-address http://localhost:21001 \
+--worker-address http://fastchat-model-worker-cuda:21002 \
+--controller-address http://fastchat-controller:21001 \
 --load-8bit \
 --cpu-offloading \
 --device "cuda" \

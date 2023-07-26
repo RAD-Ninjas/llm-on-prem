@@ -6,8 +6,8 @@ python3 \
 -m fastchat.serve.model_worker \
 --model-names ${MODEL_NAME} \
 --model-path ${MODEL_PATH} \
---worker-address http://localhost:21002 \
---controller-address http://localhost:21001 \
+--worker-address http://fastchat-model-worker-cpu:21002 \
+--controller-address http://fastchat-controller:21001 \
 --limit-worker-concurrency ${CPU_THREADS} \
 --device "cpu" \
 --host "0.0.0.0" \
