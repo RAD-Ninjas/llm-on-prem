@@ -4,7 +4,7 @@ services:
 
   # Next.js frontend ---------------------------------------------
   app:
-    profiles: ["cpu", "cuda", "ggml", "metal", "openvino"]
+    profiles: ["cpu", "cuda", "xpu", "metal", "openvino"]
     build:
       context: ./next
       dockerfile: Dockerfile
@@ -19,7 +19,7 @@ services:
 
   # API Server ---------------------------------------------
   fastchat-api-server:
-    profiles: ["cpu", "cuda", "ggml", "metal", "openvino"]
+    profiles: ["cpu", "cuda", "xpu", "metal", "openvino"]
     build:
       context: ./models
       dockerfile: cpu.Dockerfile
@@ -36,7 +36,7 @@ services:
 
   # Model Controller ---------------------------------------------
   fastchat-controller:
-    profiles: ["cpu", "cuda", "ggml", "metal", "openvino"]
+    profiles: ["cpu", "cuda", "xpu", "metal", "openvino"]
     build:
       context: ./models
       dockerfile: cpu.Dockerfile
@@ -83,29 +83,70 @@ services:
       "bash", "start.sh"
     ]
 
-  # fastchat-model-worker-openvino:
-  #   profiles: ["openvino"]
-  #   env_file:
-  #     - .env
-  #   build:
-  #     context: ./models
-  #     dockerfile: openvino.Dockerfile
-  #   volumes:
-  #     - /home/chepe/.cache/huggingface:/home/openvino/.cache/huggingface
-  #     - /home/chepe/rad-ninjas/code/FastChat:/home/openvino/FastChat
-  #     - /home/chepe/rad-ninjas/code/openvino/models:/home/openvino/models
-  #   image: fastchat-openvino:latest
-  #   working_dir: /home/openvino/FastChat
-  #   entrypoint: ["python3",
-  #                "fastchat/serve/openvino_worker.py",
-  #                "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-llama-2-7b-chat-hf}",
-  #                "--model-path", "/home/openvino/models/llama-2/ir_model",
-  #                "--worker-address", "http://fastchat-model-worker-openvino:21002",
-  #                "--controller-address", "http://fastchat-controller:21001",
-  #                "--host", "0.0.0.0",
-  #                "--port", "21002"]
-  #   ports:
-  #     - 21002:21002
+  # Model Worker XPU [Intel] -------------------------------------
+  fastchat-model-worker-xpu:
+    profiles: ["xpu"]
+    build:
+      context: ./models
+      dockerfile: xpu.Dockerfile
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - huggingface:/root/.cache/huggingface
+    image: fastchat-xpu:latest
+    env_file:
+      - .env
+    entrypoint: [
+      "bash", "start.sh"
+    ]
+
+  fastchat-model-worker-openvino:
+     profiles: ["openvino"]
+     env_file:
+       - .env
+     build:
+       context: ./models
+       dockerfile: openvino.Dockerfile
+     devices:
+       - /dev/dri:/dev/dri
+     volumes:
+       - /home/${USER}/.cache/huggingface:/home/openvino/.cache/huggingface
+       - /home/${USER}/rad-ninjas/code/FastChat:/home/openvino/FastChat
+       - /home/${USER}/rad-ninjas/code/openvino/models:/home/openvino/models
+     image: fastchat-openvino:latest
+     working_dir: /home/openvino/FastChat
+     entrypoint: ["python3",
+               "fastchat/serve/openvino_worker.py",
+               "--model-names", "${MODEL_NAME}",
+               "--model-path", "${IR_PATH}",
+               "--worker-address", "http://fastchat-model-worker-openvino:21002",
+               "--controller-address", "http://fastchat-controller:21001",
+               "--device","${DEVICE}",
+               "--host", "0.0.0.0",
+               "--port", "21002"]
+     ports:
+       - 21002:21002
+       - 8888:8888
+
+  fastchat-model-worker-openvino-setup:
+     profiles: ["openvino-setup"]
+     env_file:
+       - .env
+     build:
+       context: ./models
+       dockerfile: openvino.Dockerfile
+     devices:
+       - /dev/dri:/dev/dri
+     volumes:
+       - /home/${USER}/.cache/huggingface:/home/openvino/.cache/huggingface
+       - /home/${USER}/rad-ninjas/code/:/home/openvino
+     image: fastchat-openvino:latest
+     working_dir: /home/openvino/
+     entrypoint: ["python3", "-m", "jupyter", "notebook", "--ip=0.0.0.0"]
+     ports:
+       - 21002:21002
+       - 8888:8888
+
 
 
   
