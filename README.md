@@ -1,10 +1,5 @@
 # LLM-On-Prem
 
-<p align="center">
-  <img src="https://pbs.twimg.com/profile_images/1599457885842448384/w04XUGId_400x400.jpg" alt="Pangea" width="60"/>
-  <img src="https://pbs.twimg.com/profile_images/1641380096778055681/xRrCcdkf_400x400.jpg" alt="asdf" width="60"/>
-</p>
-
 ---
 
 ## Introduction
