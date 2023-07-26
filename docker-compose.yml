@@ -24,13 +24,13 @@ services:
       context: ./models
       dockerfile: cpu.Dockerfile
     image: fastchat-cpu:latest
-    network_mode: host
-    # ports:
-      # - "8000:8000"
+    # network_mode: host
+    ports:
+      - "8000:8000"
     entrypoint: ["python3", 
                  "-m", "fastchat.serve.openai_api_server",
-                #  "--controller-address", "http://fastchat-controller:21001",
-                 "--controller-address", "http://localhost:21001",
+                 "--controller-address", "http://fastchat-controller:21001",
+                #  "--controller-address", "http://localhost:21001",
                  "--host", "0.0.0.0",
                  "--port", "8000"]
 
@@ -41,9 +41,9 @@ services:
       context: ./models
       dockerfile: cpu.Dockerfile
     image: fastchat-cpu:latest
-    network_mode: host
-    # ports:
-      # - "21001:21001"
+    # network_mode: host
+    ports:
+      - "21001:21001"
     entrypoint: ["python3", "-m", "fastchat.serve.controller", "--host", "0.0.0.0", "--port", "21001"]
 
   # Model Worker Cuda ---------------------------------------------
@@ -85,39 +85,34 @@ services:
     image: fastchat-cpu:latest
     env_file:
       - .env
-    entrypoint: ["python3",
-                  "-m", "fastchat.serve.model_worker",
-                  "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-Llama-2-7b-chat-hf}",
-                  "--model-path", "meta-llama/Llama-2-7b-chat-hf",
-                  "--worker-address", "http://fastchat-model-worker-cpu:21002",
-                  "--controller-address", "http://fastchat-controller:21001",
-                  "--device", "cpu",
-                  "--host", "0.0.0.0",
-                  "--port", "21002"]
+    entrypoint: [
+      # Start the worker script
+      "bash", "start.sh"
+    ]
 
-  fastchat-model-worker-openvino:
-    profiles: ["openvino"]
-    env_file:
-      - .env
-    build:
-      context: ./models
-      dockerfile: openvino.Dockerfile
-    volumes:
-      - /home/chepe/.cache/huggingface:/home/openvino/.cache/huggingface
-      - /home/chepe/rad-ninjas/code/FastChat:/home/openvino/FastChat
-      - /home/chepe/rad-ninjas/code/openvino/models:/home/openvino/models
-    image: fastchat-openvino:latest
-    working_dir: /home/openvino/FastChat
-    entrypoint: ["python3",
-                 "fastchat/serve/openvino_worker.py",
-                 "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-llama-2-7b-chat-hf}",
-                 "--model-path", "/home/openvino/models/llama-2/ir_model",
-                 "--worker-address", "http://fastchat-model-worker-openvino:21002",
-                 "--controller-address", "http://fastchat-controller:21001",
-                 "--host", "0.0.0.0",
-                 "--port", "21002"]
-    ports:
-      - 21002:21002
+  # fastchat-model-worker-openvino:
+  #   profiles: ["openvino"]
+  #   env_file:
+  #     - .env
+  #   build:
+  #     context: ./models
+  #     dockerfile: openvino.Dockerfile
+  #   volumes:
+  #     - /home/chepe/.cache/huggingface:/home/openvino/.cache/huggingface
+  #     - /home/chepe/rad-ninjas/code/FastChat:/home/openvino/FastChat
+  #     - /home/chepe/rad-ninjas/code/openvino/models:/home/openvino/models
+  #   image: fastchat-openvino:latest
+  #   working_dir: /home/openvino/FastChat
+  #   entrypoint: ["python3",
+  #                "fastchat/serve/openvino_worker.py",
+  #                "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-llama-2-7b-chat-hf}",
+  #                "--model-path", "/home/openvino/models/llama-2/ir_model",
+  #                "--worker-address", "http://fastchat-model-worker-openvino:21002",
+  #                "--controller-address", "http://fastchat-controller:21001",
+  #                "--host", "0.0.0.0",
+  #                "--port", "21002"]
+  #   ports:
+  #     - 21002:21002
 
 
   
