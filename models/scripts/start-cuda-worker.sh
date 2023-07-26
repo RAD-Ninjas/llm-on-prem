@@ -4,14 +4,13 @@ python3 -c "from huggingface_hub._login import _login; import os; _login(token=o
 
 python3 \
 -m fastchat.serve.model_worker \
---model-names Llama-2-7b-chat-hf \
---model-path meta-llama/Llama-2-7b-chat-hf \
+--model-names ${MODEL_NAME} \
+--model-path ${MODEL_PATH} \
 --worker-address http://localhost:21002 \
 --controller-address http://localhost:21001 \
 --load-8bit \
 --cpu-offloading \
 --device "cuda" \
---max-gpu-memory "4G" \
 --host "0.0.0.0" \
 --port 21002;
 
