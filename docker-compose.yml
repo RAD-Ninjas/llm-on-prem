@@ -24,13 +24,13 @@ services:
       context: ./models
       dockerfile: cpu.Dockerfile
     image: fastchat-cpu:latest
-    # network_mode: host
-    ports:
-      - "8000:8000"
+    network_mode: host
+    # ports:
+    #   - "8000:8000"
     entrypoint: ["python3", 
                  "-m", "fastchat.serve.openai_api_server",
-                 "--controller-address", "http://fastchat-controller:21001",
-                #  "--controller-address", "http://localhost:21001",
+                #  "--controller-address", "http://fastchat-controller:21001",
+                 "--controller-address", "http://localhost:21001",
                  "--host", "0.0.0.0",
                  "--port", "8000"]
 
@@ -41,9 +41,9 @@ services:
       context: ./models
       dockerfile: cpu.Dockerfile
     image: fastchat-cpu:latest
-    # network_mode: host
-    ports:
-      - "21001:21001"
+    network_mode: host
+    # ports:
+    #   - "21001:21001"
     entrypoint: ["python3", "-m", "fastchat.serve.controller", "--host", "0.0.0.0", "--port", "21001"]
 
   # Model Worker Cuda ---------------------------------------------
@@ -55,6 +55,7 @@ services:
     volumes:
       - huggingface:/root/.cache/huggingface
     image: fastchat-cuda:latest
+    network_mode: host
     env_file:
       - .env
     deploy:
@@ -77,6 +78,7 @@ services:
     volumes:
       - huggingface:/root/.cache/huggingface
     image: fastchat-cpu:latest
+    network_mode: host
     env_file:
       - .env
     entrypoint: [
