@@ -8,6 +8,8 @@ python3 \
   --model-path meta-llama/Llama-2-7b-chat-hf \
   --worker-address http://fastchat-model-worker-cpu:21002 \
   --controller-address http://fastchat-controller:21001 \
+  --limit-worker-concurrency ${CPU_THREADS} \
   --device "cpu" \
   --host "0.0.0.0" \
   --port 21002;
+  
