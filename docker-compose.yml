@@ -14,8 +14,6 @@ services:
     env_file:
       - .env
     network_mode: host
-#    ports:
-#       - 3000:3000
 
   # API Server ---------------------------------------------
   fastchat-api-server:
@@ -24,7 +22,7 @@ services:
       context: ./models
       dockerfile: cpu.Dockerfile
     image: fastchat-cpu:latest
-#    network_mode: host
+  #  network_mode: host
     ports:
       - "8000:8000"
     entrypoint: ["python3", 
@@ -54,7 +52,7 @@ services:
     volumes:
       - huggingface:/root/.cache/huggingface
     image: fastchat-cuda:latest
-#    network_mode: host
+  #  network_mode: host
     env_file:
       - .env
     deploy:
@@ -77,7 +75,7 @@ services:
     volumes:
       - huggingface:/root/.cache/huggingface
     image: fastchat-cpu:latest
-#    network_mode: host
+  #  network_mode: host
     env_file:
       - .env
     entrypoint: [
@@ -100,8 +98,9 @@ services:
     entrypoint: [
       "bash", "start.sh"
     ]
-#    network_mode: host
+  #  network_mode: host
 
+  # Model Worker Metal [Apple] -------------------------------------
   fastchat-model-worker-openvino:
      profiles: ["openvino"]
      env_file:
@@ -149,7 +148,5 @@ services:
        - 8888:8888
 
 
-
-  
 volumes:
   huggingface:
