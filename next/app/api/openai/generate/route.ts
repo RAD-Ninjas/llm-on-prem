@@ -52,7 +52,7 @@ const handler = async (req: NextRequest) => {
             role:
               ix % 2 === 0
                 ? ChatCompletionRequestMessageRoleEnum.User
-                : ChatCompletionRequestMessageRoleEnum.System,
+                : ChatCompletionRequestMessageRoleEnum.Assistant,
             content: msg.message,
           }
         }),

@@ -41,9 +41,9 @@ Once you've cloned the repo, you can can build the docker images and run the con
     - Build `docker-compose --profile cuda build`
     - Run `docker-compose --profile cuda up`
   <br/>
-  - **XLA:**
-    - Build `docker-compose --profile xla build`
-    - Run `docker-compose --profile xla up`
+  - **OpenVINO:**
+    - Build `docker-compose --profile openvino build`
+    - Run `docker-compose --profile openvino up`
   <br/>
   - **Metal:**
     - Build `docker-compose --profile metal build`
