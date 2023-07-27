@@ -9,7 +9,7 @@ python                                                      \
     -m fastchat.serve.model_worker                          \
     --model-names ${MODEL_NAME}                             \
     --model-path ${MODEL_PATH}                              \
-    --worker-address http://localhost:21002                 \
+    --worker-address http://${HOSTNAME}:21002                 \
     --controller-address http://localhost:21001             \
     --limit-worker-concurrency ${CPU_THREADS}               \
     --device "mps"                                          \
