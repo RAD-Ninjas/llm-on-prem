@@ -22,4 +22,8 @@ RUN apt update && 						\
 # # Log into huggingface using the token
 # RUN python3 -c "from huggingface_hub._login import _login; import os; _login(token=os.getenv('HF_TOKEN'), add_to_git_credential=False)"
 
+RUN apt install -y dos2unix
+
 COPY scripts/start-xpu-worker.sh start.sh
+
+RUN dos2unix start.sh

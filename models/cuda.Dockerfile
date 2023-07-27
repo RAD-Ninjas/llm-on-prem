@@ -1,7 +1,7 @@
 FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update -y && apt -y upgrade
-RUN apt install -y software-properties-common
+RUN apt install -y software-properties-common dos2unix
 
 # Install Python 3.10 ---------------------
 RUN add-apt-repository -y ppa:deadsnakes/ppa
@@ -27,3 +27,5 @@ RUN pip install pydantic==1.10.12
 # RUN sed -i 's/api_keys: List\[str\] = None/api_keys: List\[str\] = []/g' /usr/local/lib/python3.10/dist-packages/fastchat/serve/openai_api_server.py
 
 COPY scripts/start-cuda-worker.sh start.sh
+
+RUN dos2unix start.sh
