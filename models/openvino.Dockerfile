@@ -8,5 +8,6 @@ RUN python3 -m pip install --upgrade --no-cache-dir -r assets/openvino-requireme
 USER openvino
 WORKDIR /home/openvino
 RUN echo "always run the line below"
-RUN git clone https://github.com/rad-ninjas/FastChat.git --branch openvino-worker --depth 1
+RUN git clone https://github.com/rad-ninjas/FastChat.git && cd FastChat && git checkout openvino-worker 
 
+COPY scripts/start-openvino-worker.sh	start.sh
