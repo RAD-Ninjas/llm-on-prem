@@ -4,8 +4,8 @@ python3 -c "from huggingface_hub._login import _login; import os; _login(token=o
 
 python3 \
 -m fastchat.serve.model_worker \
---model-names ${FASTCHAT_WORKER_MODEL_NAMES:-Llama-2-7b-chat-hf} \
---model-path meta-llama/Llama-2-7b-chat-hf \
+--model-names ${MODEL_NAME} \
+--model-path ${MODEL_PATH} \
 --worker-address http://fastchat-model-worker-xpu:21002 \
 --controller-address http://fastchat-controller:21001 \
 --device "xpu" \

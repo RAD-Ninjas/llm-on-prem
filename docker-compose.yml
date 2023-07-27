@@ -116,15 +116,7 @@ services:
        - /home/${USER}/rad-ninjas/code/openvino/models:/home/openvino/models
      image: fastchat-openvino:latest
      working_dir: /home/openvino/FastChat
-     entrypoint: ["python3",
-               "fastchat/serve/openvino_worker.py",
-               "--model-names", "${MODEL_NAME}",
-               "--model-path", "${IR_PATH}",
-               "--worker-address", "http://fastchat-model-worker-openvino:21002",
-               "--controller-address", "http://fastchat-controller:21001",
-               "--device","${DEVICE}",
-               "--host", "0.0.0.0",
-               "--port", "21002"]
+     entrypoint: ["bash", "start.sh"]
      ports:
        - 21002:21002
 #     network_mode: host
