@@ -13,7 +13,6 @@ python3 \
  --device "cuda" \
  --host "0.0.0.0" \
  --port 21002;
- 
 
 # --worker-address http://fastchat-model-worker-cuda:21002 \
 # --controller-address http://fastchat-controller:21001 \

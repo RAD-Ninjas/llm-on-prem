@@ -11,7 +11,6 @@ python3 \
  --device "xpu" \
  --host "0.0.0.0" \
  --port 21002;
- 
 
 # --worker-address http://fastchat-model-worker-cpu:21002 \
 # --controller-address http://fastchat-controller:21001 \
