@@ -117,7 +117,7 @@ services:
        - /home/${USER}/rad-ninjas/code/FastChat:/home/openvino/FastChat
        - /home/${USER}/rad-ninjas/code/openvino/models:/home/openvino/models
      image: fastchat-openvino:latest
-     working_dir: /home/openvino/FastChat
+     working_dir: /home/openvino
      entrypoint: ['bash', 'start.sh']
      ports:
        - 21002:21002

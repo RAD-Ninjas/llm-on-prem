@@ -4,27 +4,32 @@ import { v4 as uuidv4 } from 'uuid'
 import MessageRow from '../../components/MessageRow'
 import { Textarea } from '@/components/ui/textarea'
 
+type LocalMessage = {
+  id: string
+  user: string
+  message: string
+}
+
 type LocalState = {
   prompt: string
   loading: boolean
-  promptLoading: boolean
-  messages: string[]
+  generating: boolean
+  messages: LocalMessage[]
 }
 
 const Chat = () => {
-  const [localState, setLocalState] = useState({
+  const [localState, setLocalState] = useState<LocalState>({
     prompt: '',
     loading: false,
-    promptLoading: false,
+    generating: false,
     messages: [],
   })
 
   const messagesEndRef = useRef<null | HTMLDivElement>(null)
 
-
   // Append the list with the given message
-  const addToMessages = (message: any) => {
-    setLocalState((prev: any) => {
+  const addToMessages = (message: LocalMessage) => {
+    setLocalState((prev) => {
       return {
         ...prev,
         messages: [...prev.messages, message],
@@ -32,10 +37,27 @@ const Chat = () => {
     })
   }
 
-  // ----------------- OpenAI API -----------------
-  const submitData = async (msg: any) => {
-    console.log(localState.messages)
+  // Append to message with the given id
+  const appendToMessage = (id: string, message: string) => {
+    setLocalState((prev) => {
+      const updatedMessages = prev.messages.map((msg) => {
+        if (msg.id === id) {
+          return {
+            ...msg,
+            message: msg.message + message,
+          }
+        }
+        return msg
+      })
+      return {
+        ...prev,
+        messages: updatedMessages,
+      }
+    })
+  }
 
+  // ----------------- Our Generate API -----------------
+  const submitData = async (msg: any) => {
     return await fetch('/api/openai/generate', {
       method: 'POST',
       headers: {
@@ -50,7 +72,7 @@ const Chat = () => {
     })
   }
 
-  const handleKeyDown = async (e: any) => {
+  const handleSubmit = async (e: any) => {
     if (
       e.key === 'Enter' &&
       e.code === 'Enter' &&
@@ -62,9 +84,14 @@ const Chat = () => {
       localState.prompt.trim() !== ''
     ) {
       e.preventDefault()
+
       try {
         // Clean the prompt/input and set loading to true
-        setLocalState((prev) => ({ ...prev, prompt: '', loading: true }))
+        setLocalState((prev: LocalState) => ({
+          ...prev,
+          prompt: '',
+          loading: true,
+        }))
 
         // Omitting message here so we show a loading ellipsis
         // When we receive the response, we will populate the message field
@@ -80,48 +107,65 @@ const Chat = () => {
           message: localState?.prompt,
         })
 
+        let latestMsgId = uuidv4()
+        addToMessages({
+          id: latestMsgId,
+          user: 'Assistant',
+          message: '',
+        })
+
         // Add the prompt when submitting to the API
-        setLocalState((prev) => ({ ...prev, promptLoading: true }))
+        setLocalState((prev: LocalState) => ({ ...prev, generating: true }))
 
         const promptResponse = await submitData({
           ...userPrompt,
           prompt: localState?.prompt,
         })
 
-        let promptData
-        if (promptResponse.status === 200) {
-          promptData = await promptResponse.json()
-          addToMessages({
-            id: uuidv4(),
-            user: 'System',
-            message: promptData?.result,
-            maliciousURLs: promptData?.maliciousURLs,
-          })
+        if (promptResponse.ok) {
+          // Get the reader from the response
+          const reader = promptResponse.body?.getReader()
+          const decoder = new TextDecoder('utf-8')
+          let done = false
+
+          while (!done && reader) {
+            const { value, done: doneReading } = await reader.read()
+            done = doneReading
+
+            let chunk = decoder.decode(value)
+
+            // Append to the local state
+            appendToMessage(latestMsgId, chunk)
+          }
+
+          console.log('Stream complete')
+          setLocalState((prev: LocalState) => ({
+            ...prev,
+            loading: false,
+            generating: false,
+          }))
         } else {
           const errorContent = await promptResponse.text()
           console.error(errorContent, promptResponse.status)
           addToMessages({
             id: uuidv4(),
-            user: 'System',
-            message: `${errorContent} | Status: ${promptResponse.status}`,
-            maliciousURLs: [],
+            user: 'Assistant',
+            message: `${errorContent} | Status: ${promptResponse.statusText}`,
           })
-
         }
       } catch (error: any) {
         // Add the error as a message so users can see it
         addToMessages({
           id: uuidv4(),
-          user: 'System',
+          user: 'Assistant',
           message: error.message || 'Something went wrong',
-          maliciousURLs: [],
         })
       } finally {
         console.log('finally')
-        setLocalState((prev) => ({
+        setLocalState((prev: LocalState) => ({
           ...prev,
           loading: false,
-          promptLoading: false,
+          generating: false,
         }))
       }
     }
@@ -141,9 +185,6 @@ const Chat = () => {
           {localState.messages.map((msg: any) => (
             <MessageRow key={msg.id} message={msg} />
           ))}
-          {localState.promptLoading && (
-            <MessageRow key='loader' message={{ user: 'System' }} />
-          )}
         </>
         <div ref={messagesEndRef} />
       </div>
@@ -155,9 +196,12 @@ const Chat = () => {
           value={localState.prompt}
           // className="w-4/5 h-12 px-4 py-2 m-4 text-base border border-gray-300 rounded-lg"
           onChange={(e) =>
-            setLocalState((prev) => ({ ...prev, prompt: e.target.value }))
+            setLocalState((prev: LocalState) => ({
+              ...prev,
+              prompt: e.target.value,
+            }))
           }
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleSubmit}
         />
       </div>
       <p className='flex justify-center my-2 text-sm text-gray-400 dark:text-gray-700'>
