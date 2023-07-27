@@ -1,28 +1,12 @@
-import { NextRequest } from 'next/server'
-import {
-  ChatCompletionRequestMessageRoleEnum,
-  Configuration,
-  OpenAIApi,
-} from 'openai'
 
-const SOURCE = 'pangea-secure-chatgpt'
+import { NextRequest, NextResponse } from 'next/server'
+import { ChatCompletionRequestMessageRoleEnum } from 'openai'
+import { OpenAIStream, OpenAIStreamPayload } from './open-ai-stream'
+
 const TARGET_MODEL = process.env.MODEL_NAME || 'Llama-2-7b-chat-hf'
-const ACTION = 'openai_generate'
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-  basePath: process.env.MODEL_BASE_PATH,
-})
-const openai = new OpenAIApi(configuration)
-
-
-const handler = async (req: NextRequest) => {
-  if (!configuration.apiKey) {
-    return new Response('The service cannot communicate with OpenAI', {
-      status: 500,
-    })
-  }
-
+// ----------------------------------------------------------
+const handler = async (req: NextRequest, res: NextResponse) => {
   const body = await req.json()
   const prompt = body?.prompt?.trim() || ''
   const prompt_id = body?.prompt_id || ''
@@ -33,13 +17,8 @@ const handler = async (req: NextRequest) => {
   }
 
   try {
-    const promises = []
-
-    // we start with the original prompt and update it based on the options
-    let processedPrompt = prompt
-
-    // Call OpenAI API with the processed prompt
-    const chatReqData = {
+    // Build up the request data
+    const chatReqData: OpenAIStreamPayload = {
       model: TARGET_MODEL,
       messages: [
         {
@@ -53,47 +32,29 @@ const handler = async (req: NextRequest) => {
               ix % 2 === 0
                 ? ChatCompletionRequestMessageRoleEnum.User
                 : ChatCompletionRequestMessageRoleEnum.Assistant,
-            content: msg.message,
+            content: msg.message as string,
           }
         }),
         {
           role: ChatCompletionRequestMessageRoleEnum.User,
-          content: processedPrompt,
+          content: prompt as string,
         },
       ],
+      stream: true,
       // temperature: 0.7,
       // max_tokens: getAvailableTokens(processedPrompt),
     }
 
-    promises.push(openai.createChatCompletion(chatReqData))
+    const stream = await OpenAIStream(chatReqData)
 
-    const results = await Promise.allSettled(promises)
-
-    let chatResults
-
-    if (results.length > 1) {
-      chatResults = results[0] as any
-      chatResults = chatResults?.value
-    } else {
-      chatResults = results[0]
-    }
-
-    let sanitizedResponse =
-      chatResults?.value?.data?.choices?.[0]?.message?.content || ''
-
-    // Remove the pattern "<|im_end|><|endoftext|>" from the response
-    sanitizedResponse = sanitizedResponse.replaceAll('<|im_end|>', '')
-    sanitizedResponse = sanitizedResponse.replaceAll('<|endoftext|>', '')
-
-    const responseData = {
-      prompt: processedPrompt,
-      prompt_id,
-      result: sanitizedResponse,
-    }
-
-    return new Response(JSON.stringify(responseData), {
-      headers: { 'content-type': 'application/json' },
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      },
     })
+
   } catch (error: any) {
     if (error.response) {
       console.error(error.response.status, error.response.data)

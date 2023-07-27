@@ -41,6 +41,9 @@ dependencies:
   eslint-config-next:
     specifier: 13.4.10
     version: 13.4.10(eslint@8.45.0)(typescript@5.1.6)
+  eventsource-parser:
+    specifier: ^1.0.0
+    version: 1.0.0
   lucide-react:
     specifier: ^0.260.0
     version: 0.260.0(react@18.2.0)
@@ -1788,6 +1791,11 @@ packages:
   /esutils@2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
+    dev: false
+
+  /eventsource-parser@1.0.0:
+    resolution: {integrity: sha512-9jgfSCa3dmEme2ES3mPByGXfgZ87VbP97tng1G2nWwWx6bV2nYxm2AWCrbQjXToSe+yYlqaZNtxffR9IeQr95g==}
+    engines: {node: '>=14.18'}
     dev: false
 
   /execa@5.1.1:

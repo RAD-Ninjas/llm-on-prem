@@ -4,7 +4,8 @@ services:
 
   # Next.js frontend ---------------------------------------------
   app:
-    profiles: ['cpu', 'cuda', 'xpu', 'metal', 'openvino']
+    profiles: ['xxx']
+    # profiles: ['cpu', 'cuda', 'xpu', 'metal', 'openvino']
     build:
       context: ./next
       dockerfile: Dockerfile
